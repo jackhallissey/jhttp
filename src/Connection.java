@@ -25,7 +25,7 @@ class Connection extends Thread {
         }
     }
 
-    public void handleRequest(BufferedReader bf, BufferedOutputStream out) throws IOException {
+    private void handleRequest(BufferedReader bf, BufferedOutputStream out) throws IOException {
             Response r;
 
             try {
@@ -49,10 +49,10 @@ class Connection extends Thread {
             r.send(out);
     }
 
-    public void close() {
+    private void close() {
         try {
             sock.close();
-            System.out.printf("Closed connected to %s\n", sock.getRemoteSocketAddress());
+            System.out.printf("Closed connection to %s\n", sock.getRemoteSocketAddress());
         } catch (Exception e) {
             e.printStackTrace();
         }
