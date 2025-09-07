@@ -1,11 +1,14 @@
 import java.io.*;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 
 class Response {
     private static String headersTemplate = "HTTP/1.1 %d %s\r\nContent-Type: text/html; charset=utf-8\r\n\r\n";
     private static String errorBodyTemplate = "<!DOCTYPE html><html lang=\"en\"><head><title>Error</title></head><body><h1>%d %s</h1></body></html>";
     private static byte[] responseTerminator = "\r\n\r\n".getBytes();
+
+    private static Path wwwDirPath = Path.of("www").toAbsolutePath().normalize();
 
     private static HashMap<Integer, String> statusText = initMap();
     
@@ -49,7 +52,17 @@ class Response {
                     filepath = "/index.html";
                 }
 
-                file = new File("./www" + filepath);
+                file = new File("www" + filepath);
+
+                // Check to prevent file leaks
+                Path absFilePath = file.toPath().toAbsolutePath().normalize();
+                // Normalisation is essential for this check, e.g. to convert "www/../f" to "f"
+
+                if (!absFilePath.startsWith(wwwDirPath)) {
+                    // If the file to be served is not in the www folder, respond with 400 Bad Request
+                    file = null;
+                    status = 400;
+                }
             }
 
         }
